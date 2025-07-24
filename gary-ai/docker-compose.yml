@@ -1,0 +1,149 @@
+version: '3.8'
+
+services:
+  # WordPress service
+  wordpress:
+    image: wordpress:6.4-apache
+    container_name: gary-ai-wordpress
+    restart: unless-stopped
+    ports:
+      - "8080:80"
+    environment:
+      WORDPRESS_DB_HOST: mysql:3306
+      WORDPRESS_DB_USER: wordpress
+      WORDPRESS_DB_PASSWORD: wordpress_password
+      WORDPRESS_DB_NAME: wordpress
+      WORDPRESS_DEBUG: 1
+      WORDPRESS_DEBUG_LOG: 1
+      WORDPRESS_DEBUG_DISPLAY: 0
+      WORDPRESS_CONFIG_EXTRA: |
+        define('WP_MEMORY_LIMIT', '512M');
+        define('SCRIPT_DEBUG', true);
+        define('CONCATENATE_SCRIPTS', false);
+        define('COMPRESS_SCRIPTS', false);
+        define('COMPRESS_CSS', false);
+        ini_set('display_errors', 1);
+        ini_set('display_startup_errors', 1);
+        error_reporting(E_ALL);
+    volumes:
+      # Mount the entire gary-ai directory as a plugin
+      - ./:/var/www/html/wp-content/plugins/gary-ai
+      # Mount uploads directory for file persistence
+      - wordpress_uploads:/var/www/html/wp-content/uploads
+      # Mount themes directory for customization
+      - wordpress_themes:/var/www/html/wp-content/themes
+      # Mount the WordPress config override
+      - ./wp-config-docker.php:/var/www/html/wp-config-override.php
+      # Mount custom initialization script
+      - ./docker/init-wordpress.sh:/docker-entrypoint-init.d/init-wordpress.sh
+    depends_on:
+      - mysql
+    networks:
+      - gary-ai-network
+
+  # MySQL database service
+  mysql:
+    image: mysql:8.0
+    container_name: gary-ai-mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_DATABASE: wordpress
+      MYSQL_USER: wordpress
+      MYSQL_PASSWORD: wordpress_password
+      MYSQL_ROOT_PASSWORD: root_password
+      MYSQL_ALLOW_EMPTY_PASSWORD: "no"
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./database/init:/docker-entrypoint-initdb.d
+    ports:
+      - "3306:3306"
+    command: >
+      --default-authentication-plugin=mysql_native_password
+      --innodb-buffer-pool-size=128M
+      --max-connections=100
+      --sql-mode=STRICT_TRANS_TABLES,NO_ZERO_DATE,NO_ZERO_IN_DATE,ERROR_FOR_DIVISION_BY_ZERO
+    networks:
+      - gary-ai-network
+
+  # phpMyAdmin for database management
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin:5.2
+    container_name: gary-ai-phpmyadmin
+    restart: unless-stopped
+    ports:
+      - "8081:80"
+    environment:
+      PMA_HOST: mysql
+      PMA_PORT: 3306
+      PMA_USER: root
+      PMA_PASSWORD: root_password
+      MYSQL_ROOT_PASSWORD: root_password
+      UPLOAD_LIMIT: 100M
+    depends_on:
+      - mysql
+    networks:
+      - gary-ai-network
+
+  # Mailhog for email testing (catches emails sent by WordPress)
+  mailhog:
+    image: mailhog/mailhog:v1.0.1
+    container_name: gary-ai-mailhog
+    restart: unless-stopped
+    ports:
+      - "8025:8025"  # Web UI
+      - "1025:1025"  # SMTP
+    networks:
+      - gary-ai-network
+
+  # Redis for caching (optional but helpful for testing)
+  redis:
+    image: redis:7-alpine
+    container_name: gary-ai-redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    command: redis-server --appendonly yes
+    networks:
+      - gary-ai-network
+
+  # WP-CLI service for command line operations
+  wp-cli:
+    image: wordpress:cli-2.9
+    container_name: gary-ai-wp-cli
+    restart: "no"
+    environment:
+      WORDPRESS_DB_HOST: mysql:3306
+      WORDPRESS_DB_USER: wordpress
+      WORDPRESS_DB_PASSWORD: wordpress_password
+      WORDPRESS_DB_NAME: wordpress
+    volumes:
+      - ./:/var/www/html/wp-content/plugins/gary-ai
+      - wordpress_uploads:/var/www/html/wp-content/uploads
+      - wordpress_themes:/var/www/html/wp-content/themes
+      - ./docker/wp-cli-setup.sh:/usr/local/bin/setup-wordpress
+    depends_on:
+      - mysql
+      - wordpress
+    networks:
+      - gary-ai-network
+    working_dir: /var/www/html
+    entrypoint: ["sh", "-c", "sleep 30 && /usr/local/bin/setup-wordpress"]
+
+volumes:
+  mysql_data:
+    driver: local
+  wordpress_uploads:
+    driver: local
+  wordpress_themes:
+    driver: local
+  redis_data:
+    driver: local
+
+networks:
+  gary-ai-network:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.20.0.0/16 

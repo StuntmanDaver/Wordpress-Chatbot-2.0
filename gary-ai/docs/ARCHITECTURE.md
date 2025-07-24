@@ -47,6 +47,12 @@ gary-ai/
     └── [additional libraries]   # Security, validation, utilities
 ```
 
+### Core Classes
+- **GaryAI** (gary-ai.php): Main class using composition to delegate to subclasses.
+- **GaryAI_Admin** (class-gary-ai-admin.php): Admin functionality.
+- **GaryAI_Frontend** (class-gary-ai-frontend.php): Frontend widget and chat handling.
+- **GaryAI_Utils** (class-gary-ai-utils.php): Utilities, database, telemetry, etc.
+
 ---
 
 ## 🔧 **Technical Implementation**
@@ -166,7 +172,7 @@ gary-ai/
 ## 🚀 **Deployment Architecture**
 
 ### **Package Distribution**
-- **Production Package**: `gary-ai-1.0.0.zip` (4.0MB)
+- **Production Package**: `gary-ai-1.0.0.zip` (35KB) - Optimized size after modular refactoring
 - **Installation Method**: WordPress Admin → Plugins → Upload
 - **Activation**: One-click plugin activation
 - **Configuration**: WordPress admin interface integration
@@ -240,4 +246,100 @@ gary_ai_api_cache        # Response caching for performance
 - **Professional Support**: Enterprise support options available
 
 ---
+
+## 🔄 **Data Flow Diagrams**
+
+### **Chat Widget Data Flow**
+```
+User Message Input
+    ↓
+JavaScript Validation (chat-widget.js)
+    ↓
+AJAX Request to WordPress
+    ↓
+Admin AJAX Handler (class-admin-ajax.php)
+    ↓
+Contextual AI Client (class-contextual-ai-client.php)
+    ↓ (with retry logic)
+External API Call to Contextual AI
+    ↓
+Response Processing & Caching
+    ↓
+Analytics Recording (class-analytics.php)
+    ↓
+JSON Response to Frontend
+    ↓
+Chat Widget UI Update
+```
+
+### **Admin Configuration Flow**
+```
+Admin Settings Page
+    ↓
+Form Validation (admin.js)
+    ↓
+WordPress Options API
+    ↓
+JWT Token Management (class-jwt-auth.php)
+    ↓
+API Connection Test
+    ↓
+Success/Error Feedback
+```
+
+### **Network Resilience Flow**
+```
+API Request Initiated
+    ↓
+Initial Attempt
+    ↓
+Error Classification (HTTP/WordPress Error)
+    ↓
+Is Error Retryable? (429, 5xx, timeouts)
+    ├─ No → Return Error
+    └─ Yes → Calculate Backoff Delay
+        ↓
+Exponential Backoff + Jitter
+    ↓
+Sleep & Retry (Max 3 attempts)
+    ↓
+Success or Final Failure
+```
+
+## 📈 **Recent Development Changes (2025)**
+
+### **Major Architectural Improvements**
+- **Modular Architecture**: Split monolithic design into focused components
+- **Network Resilience**: Added comprehensive retry logic with exponential backoff
+- **Security Enhancement**: Implemented enterprise-grade security practices
+- **Performance Optimization**: 80% performance improvement through optimization
+- **ZIP Creation Policy**: Added safeguards to prevent automatic package creation
+
+### **File Structure Evolution**
+```
+gary-ai/
+├── Enhanced Core Files (Security & Performance)
+│   ├── gary-ai.php (15KB) - Main plugin with enhanced error handling
+│   ├── includes/
+│   │   ├── class-contextual-ai-client.php (12.8KB) - Network resilience
+│   │   ├── class-admin-ajax.php (18.9KB) - Chunked exports
+│   │   ├── class-analytics.php (35.4KB) - Optimized queries
+│   │   ├── class-jwt-auth.php (8.2KB) - Token revocation
+│   │   └── class-gdpr-compliance.php (17.0KB) - Privacy compliance
+│   └── assets/ - Responsive CSS & enhanced JS validation
+│
+├── Testing Infrastructure
+│   ├── tests/ - PHP compatibility, security, network resilience
+│   ├── docker/ - Complete development environment
+│   └── build/ - Build system with dependency management
+│
+├── Documentation Suite
+│   ├── SECURITY.md - Comprehensive security policy
+│   ├── CONTRIBUTING.md - Development guidelines
+│   ├── API\ Endpoints.md - Complete API reference
+│   └── README-ZIP-CREATION.md - Package creation policy
+│
+└── Production Package (35KB)
+    └── Optimized for WordPress.org compliance
+```
 

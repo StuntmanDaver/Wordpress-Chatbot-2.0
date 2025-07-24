@@ -45,6 +45,30 @@ debug-*.php
 test-*.php
 diagnostic-*.php
 
+# Gary AI Plugin specific
+gary-ai/temp-extract/
+gary-ai/release/
+gary-ai/dist/
+gary-ai/logs/*.log
+gary-ai/database-verification-summary.md
+gary-ai/FINAL-DEPLOYMENT-STATUS.md
+
+# Testing and Docker
+gary-ai/docker/volumes/
+gary-ai/tests/coverage/
+gary-ai/tests/results/
+
+# Build and package files
+gary-ai/build/node_modules/
+gary-ai/build/dist/
+gary-ai/*.zip
+
+# Documentation (development only)
+gary-ai/README-ZIP-CREATION.md
+gary-ai/README-DOCKER-TESTING.md
+gary-ai/DOCKER-TESTING-GUIDE.md
+gary-ai/PROJECT-CLEANUP-SUMMARY.md
+
 # Sensitive files
 credentials.txt
 api-keys.txt

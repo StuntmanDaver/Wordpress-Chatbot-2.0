@@ -1,0 +1,39 @@
+# ⚠️ ZIP Creation Policy: Do not create ZIP until user explicitly instructs
+# This file documents what should be excluded when ZIP is eventually created
+
+# Development files
+node_modules/
+.git/
+.gitignore
+.distignore
+.zipignore
+
+# Documentation that should not be in production ZIP
+README-ZIP-CREATION.md
+DOCKER-TESTING-GUIDE.md
+README-DOCKER-TESTING.md
+CONTRIBUTING.md
+PROJECT-CLEANUP-SUMMARY.md
+
+# Build and test files
+build/
+dist/
+temp-extract/
+tests/
+docker/
+docker-compose.yml
+docker-compose.local.yml
+
+# Scripts and config files
+scripts/
+build-release.js
+wp-config-docker.php
+*.log
+
+# Existing ZIP files (don't zip ZIPs)
+*.zip
+
+# Database files
+database/
+
+# User requested: Only create ZIP when explicitly instructed 

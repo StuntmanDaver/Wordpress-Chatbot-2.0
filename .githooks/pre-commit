@@ -1,0 +1,105 @@
+#!/bin/bash
+
+# Pre-commit hook to update changelog
+# This hook runs before each commit to check for changes and update changelog
+
+set -e
+
+echo "🔍 Checking for changes to update changelog..."
+
+# Get the list of staged files
+STAGED_FILES=$(git diff --cached --name-only)
+
+# Check if there are any significant changes
+SIGNIFICANT_CHANGES=false
+CHANGE_TYPES=()
+
+# Check for different types of changes
+if echo "$STAGED_FILES" | grep -E "\.(php|js|css)$" > /dev/null; then
+    SIGNIFICANT_CHANGES=true
+    CHANGE_TYPES+=("code")
+fi
+
+if echo "$STAGED_FILES" | grep -E "^(package\.json|composer\.json)$" > /dev/null; then
+    SIGNIFICANT_CHANGES=true
+    CHANGE_TYPES+=("dependencies")
+fi
+
+if echo "$STAGED_FILES" | grep -E "^(docker-compose\.yml|webpack\.config\.js|\.env\.example)$" > /dev/null; then
+    SIGNIFICANT_CHANGES=true
+    CHANGE_TYPES+=("config")
+fi
+
+if echo "$STAGED_FILES" | grep -E "^(readme\.md|.*\.md)$" > /dev/null; then
+    SIGNIFICANT_CHANGES=true
+    CHANGE_TYPES+=("docs")
+fi
+
+if echo "$STAGED_FILES" | grep -E "^tests/" > /dev/null; then
+    SIGNIFICANT_CHANGES=true
+    CHANGE_TYPES+=("tests")
+fi
+
+# If no significant changes, skip changelog update
+if [ "$SIGNIFICANT_CHANGES" = false ]; then
+    echo "✅ No significant changes detected, skipping changelog update"
+    exit 0
+fi
+
+# Generate changelog entry
+TIMESTAMP=$(date '+%Y-%m-%d %H:%M:%S')
+COMMIT_MSG_FILE=".git/COMMIT_EDITMSG"
+
+# Create a temporary changelog entry
+TEMP_CHANGELOG=$(mktemp)
+echo "## [Unreleased] - $TIMESTAMP" > "$TEMP_CHANGELOG"
+echo "" >> "$TEMP_CHANGELOG"
+
+# Add change types
+for CHANGE_TYPE in "${CHANGE_TYPES[@]}"; do
+    case $CHANGE_TYPE in
+        "code")
+            echo "### Changed" >> "$TEMP_CHANGELOG"
+            echo "- Updated code files (PHP, JavaScript, CSS)" >> "$TEMP_CHANGELOG"
+            echo "" >> "$TEMP_CHANGELOG"
+            ;;
+        "dependencies")
+            echo "### Changed" >> "$TEMP_CHANGELOG"
+            echo "- Updated project dependencies" >> "$TEMP_CHANGELOG"
+            echo "" >> "$TEMP_CHANGELOG"
+            ;;
+        "config")
+            echo "### Changed" >> "$TEMP_CHANGELOG"
+            echo "- Updated configuration files" >> "$TEMP_CHANGELOG"
+            echo "" >> "$TEMP_CHANGELOG"
+            ;;
+        "docs")
+            echo "### Changed" >> "$TEMP_CHANGELOG"
+            echo "- Updated documentation" >> "$TEMP_CHANGELOG"
+            echo "" >> "$TEMP_CHANGELOG"
+            ;;
+        "tests")
+            echo "### Changed" >> "$TEMP_CHANGELOG"
+            echo "- Updated tests" >> "$TEMP_CHANGELOG"
+            echo "" >> "$TEMP_CHANGELOG"
+            ;;
+    esac
+done
+
+# Add detailed file list
+echo "### Files Modified" >> "$TEMP_CHANGELOG"
+echo "$STAGED_FILES" | while read -r file; do
+    if [ -n "$file" ]; then
+        echo "- \`$file\`" >> "$TEMP_CHANGELOG"
+    fi
+done
+echo "" >> "$TEMP_CHANGELOG"
+
+echo "📝 Changelog entry prepared. You can edit it in your commit message."
+echo "📋 Changed files:"
+echo "$STAGED_FILES"
+
+# Clean up
+rm -f "$TEMP_CHANGELOG"
+
+echo "✅ Pre-commit hook completed successfully"

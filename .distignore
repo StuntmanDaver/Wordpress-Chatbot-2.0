@@ -1,0 +1,141 @@
+# WordPress Plugin Distribution Ignore File
+# This file specifies which files and directories should be excluded from plugin distribution
+
+# Version Control
+.git/
+.gitignore
+.githooks/
+.github/
+
+# IDE and Editor Files
+.vscode/
+.cursor/
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+
+# Development Dependencies
+node_modules/
+vendor/
+composer.lock
+package-lock.json
+
+# Build and Distribution
+build/
+dist/
+gary-ai-1.0.0/
+*.zip
+
+# Testing
+tests/
+coverage/
+*.test.js
+phpunit.xml
+jest.config.js
+
+# Documentation (keep only essential)
+docs/
+EXHAUSTIVE_DIRECTORY_MAP.md
+CLEAN_STRUCTURE_SUMMARY.md
+CONSOLIDATION_SUMMARY.md
+FINAL_VERIFICATION_REPORT.md
+DIRECTORY_MAP_VERIFICATION_REPORT.md
+LOCAL_SETUP_STATUS.md
+deployment-report-*.txt
+CHANGELOG_AUTOMATION.md
+CONSOLIDATION_PLAN.md
+
+# Gary AI Plugin development documentation (exclude from production)
+gary-ai/README-ZIP-CREATION.md
+gary-ai/README-DOCKER-TESTING.md
+gary-ai/DOCKER-TESTING-GUIDE.md
+gary-ai/PROJECT-CLEANUP-SUMMARY.md
+gary-ai/FINAL-DEPLOYMENT-STATUS.md
+gary-ai/database-verification-summary.md
+gary-ai/CONTRIBUTING.md
+gary-ai/SECURITY.md
+
+# Gary AI Plugin build and test files
+gary-ai/build/
+gary-ai/dist/
+gary-ai/temp-extract/
+gary-ai/release/
+gary-ai/tests/
+gary-ai/docker/
+gary-ai/scripts/
+gary-ai/logs/
+gary-ai/*.zip
+
+# Gary AI Plugin Docker and development
+gary-ai/docker-compose.yml
+gary-ai/docker-compose.local.yml
+gary-ai/wp-config-docker.php
+gary-ai/build-release.js
+gary-ai/.zipignore
+
+# Configuration Files (development only)
+webpack.config.js
+phpcs.xml
+.eslintrc.js
+.prettierrc
+docker-compose.yml
+docker-compose.local.yml
+
+# Environment Files
+.env
+.env.example
+.env.local
+.env.production
+
+# Logs
+logs/
+*.log
+
+# Scripts (development only)
+scripts/
+
+# Source Files (keep only compiled assets)
+src/
+
+# Configuration Directory
+config/
+
+# Temporary Files
+tmp/
+temp/
+*.tmp
+
+# Lock Files
+yarn.lock
+
+# OS Generated Files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# NPM/Yarn
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Editor Directories and Files
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# Plugin Development Files
+install-*.sh
+prepare-wordpress-org.sh
+
+# Backup Files
+*.bak
+*.backup 

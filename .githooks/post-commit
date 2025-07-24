@@ -1,0 +1,104 @@
+#!/bin/bash
+
+# Post-commit hook to automatically update changelog with commit information
+# This runs after a successful commit
+
+set -e
+
+echo "📝 Updating changelog with commit information..."
+
+# Get the latest commit information
+COMMIT_HASH=$(git rev-parse --short HEAD)
+COMMIT_MSG=$(git log -1 --pretty=%B)
+COMMIT_AUTHOR=$(git log -1 --pretty=%an)
+COMMIT_DATE=$(git log -1 --pretty=%cd --date=short)
+TIMESTAMP=$(date '+%Y-%m-%d')
+
+# Get the files changed in the last commit
+CHANGED_FILES=$(git diff-tree --no-commit-id --name-only -r HEAD)
+
+# Create a backup of the current changelog
+cp changelog.md changelog.md.backup
+
+# Create temporary file for new changelog content
+TEMP_CHANGELOG=$(mktemp)
+
+# Check if this is the first entry or if we need to update existing unreleased section
+if grep -q "## \[Unreleased\]" changelog.md; then
+    # Update existing unreleased section
+    echo "🔄 Updating existing unreleased section..."
+    
+    # Extract everything before the first version entry
+    sed -n '1,/^## \[Unreleased\]/p' changelog.md > "$TEMP_CHANGELOG"
+    
+    # Add commit information
+    echo "" >> "$TEMP_CHANGELOG"
+    echo "### Commit: $COMMIT_HASH - $COMMIT_DATE" >> "$TEMP_CHANGELOG"
+    echo "**Author:** $COMMIT_AUTHOR" >> "$TEMP_CHANGELOG"
+    echo "**Message:** $COMMIT_MSG" >> "$TEMP_CHANGELOG"
+    echo "" >> "$TEMP_CHANGELOG"
+    
+    # Categorize changes
+    if echo "$CHANGED_FILES" | grep -E "\.(php)$" > /dev/null; then
+        echo "### Changed - PHP" >> "$TEMP_CHANGELOG"
+        echo "$CHANGED_FILES" | grep -E "\.(php)$" | sed 's/^/- /' >> "$TEMP_CHANGELOG"
+        echo "" >> "$TEMP_CHANGELOG"
+    fi
+    
+    if echo "$CHANGED_FILES" | grep -E "\.(js)$" > /dev/null; then
+        echo "### Changed - JavaScript" >> "$TEMP_CHANGELOG"
+        echo "$CHANGED_FILES" | grep -E "\.(js)$" | sed 's/^/- /' >> "$TEMP_CHANGELOG"
+        echo "" >> "$TEMP_CHANGELOG"
+    fi
+    
+    if echo "$CHANGED_FILES" | grep -E "\.(css)$" > /dev/null; then
+        echo "### Changed - CSS" >> "$TEMP_CHANGELOG"
+        echo "$CHANGED_FILES" | grep -E "\.(css)$" | sed 's/^/- /' >> "$TEMP_CHANGELOG"
+        echo "" >> "$TEMP_CHANGELOG"
+    fi
+    
+    if echo "$CHANGED_FILES" | grep -E "\.(md)$" > /dev/null; then
+        echo "### Changed - Documentation" >> "$TEMP_CHANGELOG"
+        echo "$CHANGED_FILES" | grep -E "\.(md)$" | sed 's/^/- /' >> "$TEMP_CHANGELOG"
+        echo "" >> "$TEMP_CHANGELOG"
+    fi
+    
+    if echo "$CHANGED_FILES" | grep -E "^(package\.json|composer\.json)$" > /dev/null; then
+        echo "### Changed - Dependencies" >> "$TEMP_CHANGELOG"
+        echo "$CHANGED_FILES" | grep -E "^(package\.json|composer\.json)$" | sed 's/^/- /' >> "$TEMP_CHANGELOG"
+        echo "" >> "$TEMP_CHANGELOG"
+    fi
+    
+    # Add remaining content from original changelog (skip the unreleased section header)
+    sed -n '/^## \[Unreleased\]/,$p' changelog.md | tail -n +2 | sed '/^$/,$!d' >> "$TEMP_CHANGELOG"
+    
+else
+    # Create new unreleased section
+    echo "✨ Creating new unreleased section..."
+    
+    # Keep the header
+    head -n 5 changelog.md > "$TEMP_CHANGELOG"
+    
+    # Add new unreleased section
+    echo "" >> "$TEMP_CHANGELOG"
+    echo "## [Unreleased]" >> "$TEMP_CHANGELOG"
+    echo "" >> "$TEMP_CHANGELOG"
+    echo "### Commit: $COMMIT_HASH - $COMMIT_DATE" >> "$TEMP_CHANGELOG"
+    echo "**Author:** $COMMIT_AUTHOR" >> "$TEMP_CHANGELOG"
+    echo "**Message:** $COMMIT_MSG" >> "$TEMP_CHANGELOG"
+    echo "" >> "$TEMP_CHANGELOG"
+    
+    # Add the rest of the original changelog
+    tail -n +6 changelog.md >> "$TEMP_CHANGELOG"
+fi
+
+# Replace the original changelog
+mv "$TEMP_CHANGELOG" changelog.md
+
+echo "✅ Changelog updated successfully!"
+echo "📋 Updated with commit: $COMMIT_HASH"
+echo "📝 Commit message: $COMMIT_MSG"
+echo "👤 Author: $COMMIT_AUTHOR"
+
+# Clean up backup if everything went well
+rm -f changelog.md.backup
