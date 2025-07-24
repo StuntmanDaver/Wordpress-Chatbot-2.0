@@ -79,6 +79,7 @@ class GaryAI {
         // Admin hooks
         add_action('admin_enqueue_scripts', [$this, 'enqueueAdminAssets']);
         add_action('admin_menu', [$this, 'addAdminMenu']);
+        add_action('admin_init', [$this, 'registerSettings']);
         
         // AJAX hooks - Note: gary_ai_chat handlers are in GaryAIAdminAjax class
         add_action('wp_ajax_gary_ai_test_connection', [$this, 'handleTestConnection']);
@@ -257,6 +258,74 @@ class GaryAI {
     }
     
     /**
+     * Register settings
+     */
+    public function registerSettings() {
+        // Register individual settings with the same group
+        register_setting('gary_ai_options', 'gary_ai_chatbot_enabled', [
+            'type' => 'boolean',
+            'sanitize_callback' => 'absint',
+            'default' => 0
+        ]);
+        register_setting('gary_ai_options', 'gary_ai_contextual_api_key', [
+            'type' => 'string',
+            'sanitize_callback' => 'sanitize_text_field',
+            'default' => ''
+        ]);
+        register_setting('gary_ai_options', 'gary_ai_agent_id', [
+            'type' => 'string',
+            'sanitize_callback' => 'sanitize_text_field',
+            'default' => ''
+        ]);
+        register_setting('gary_ai_options', 'gary_ai_datastore_id', [
+            'type' => 'string',
+            'sanitize_callback' => 'sanitize_text_field',
+            'default' => ''
+        ]);
+        
+        // Add settings section
+        add_settings_section(
+            'gary_ai_main_section',
+            __('Gary AI Configuration', 'gary-ai'),
+            null,
+            'gary_ai_options'
+        );
+        
+        // Add settings fields
+        add_settings_field(
+            'gary_ai_chatbot_enabled',
+            __('Enable Chatbot', 'gary-ai'),
+            [$this, 'renderChatbotEnabledField'],
+            'gary_ai_options',
+            'gary_ai_main_section'
+        );
+        
+        add_settings_field(
+            'gary_ai_contextual_api_key',
+            __('API Key', 'gary-ai'),
+            [$this, 'renderApiKeyField'],
+            'gary_ai_options',
+            'gary_ai_main_section'
+        );
+        
+        add_settings_field(
+            'gary_ai_agent_id',
+            __('Agent ID', 'gary-ai'),
+            [$this, 'renderAgentIdField'],
+            'gary_ai_options',
+            'gary_ai_main_section'
+        );
+        
+        add_settings_field(
+            'gary_ai_datastore_id',
+            __('Datastore ID', 'gary-ai'),
+            [$this, 'renderDatastoreIdField'],
+            'gary_ai_options',
+            'gary_ai_main_section'
+        );
+    }
+    
+    /**
      * Add admin menu
      */
     public function addAdminMenu() {
@@ -265,18 +334,9 @@ class GaryAI {
             __('Gary AI', 'gary-ai'),
             'manage_options',
             'gary-ai',
-            [$this, 'renderAdminPage'],
+            [$this, 'renderSettingsPage'],
             'dashicons-format-chat',
             30
-        );
-        
-        add_submenu_page(
-            'gary-ai',
-            __('Settings', 'gary-ai'),
-            __('Settings', 'gary-ai'),
-            'manage_options',
-            'gary-ai-settings',
-            [$this, 'renderSettingsPage']
         );
     }
     
@@ -295,22 +355,48 @@ class GaryAI {
     public function renderSettingsPage() {
         echo '<div class="wrap"><h1>' . __('Gary AI Settings', 'gary-ai') . '</h1>';
         echo '<form method="post" action="options.php">';
-        settings_fields('gary_ai_settings');
-        do_settings_sections('gary_ai_settings');
-        echo '<table class="form-table">';
-        echo '<tr><th scope="row">' . __('Enable Chatbot', 'gary-ai') . '</th>';
-        echo '<td><input type="checkbox" name="gary_ai_chatbot_enabled" value="1" ' . checked(1, get_option('gary_ai_chatbot_enabled', 0), false) . ' /></td></tr>';
-        echo '<tr><th scope="row">' . __('API Key', 'gary-ai') . '</th>';
-        echo '<td><input type="text" name="gary_ai_contextual_api_key" value="' . esc_attr(get_option('gary_ai_contextual_api_key', '')) . '" /></td></tr>';
-        echo '<tr><th scope="row">' . __('Agent ID', 'gary-ai') . '</th>';
-        echo '<td><input type="text" name="gary_ai_agent_id" value="' . esc_attr(get_option('gary_ai_agent_id', '')) . '" /></td></tr>';
-        echo '<tr><th scope="row">' . __('Datastore ID', 'gary-ai') . '</th>';
-        echo '<td><input type="text" name="gary_ai_datastore_id" value="' . esc_attr(get_option('gary_ai_datastore_id', '')) . '" /></td></tr>';
-        echo '</table>';
+        settings_fields('gary_ai_options');
+        do_settings_sections('gary_ai_options');
         echo '<p><button type="button" id="gary-ai-test-connection" class="button">' . __('Test Connection', 'gary-ai') . '</button></p>';
         echo '<div class="gary-ai-test-result" style="display:none;"></div>';
         submit_button();
         echo '</form></div>';
+    }
+    
+    /**
+     * Render chatbot enabled field
+     */
+    public function renderChatbotEnabledField() {
+        $value = get_option('gary_ai_chatbot_enabled', 0);
+        echo '<input type="checkbox" name="gary_ai_chatbot_enabled" value="1" ' . checked(1, $value, false) . ' />';
+        echo '<p class="description">' . __('Enable the Gary AI chatbot widget on your website.', 'gary-ai') . '</p>';
+    }
+    
+    /**
+     * Render API key field
+     */
+    public function renderApiKeyField() {
+        $value = get_option('gary_ai_contextual_api_key', '');
+        echo '<input type="text" name="gary_ai_contextual_api_key" value="' . esc_attr($value) . '" class="regular-text" />';
+        echo '<p class="description">' . __('Enter your Contextual AI API key.', 'gary-ai') . '</p>';
+    }
+    
+    /**
+     * Render agent ID field
+     */
+    public function renderAgentIdField() {
+        $value = get_option('gary_ai_agent_id', '');
+        echo '<input type="text" name="gary_ai_agent_id" value="' . esc_attr($value) . '" class="regular-text" />';
+        echo '<p class="description">' . __('Enter your Contextual AI Agent ID.', 'gary-ai') . '</p>';
+    }
+    
+    /**
+     * Render datastore ID field
+     */
+    public function renderDatastoreIdField() {
+        $value = get_option('gary_ai_datastore_id', '');
+        echo '<input type="text" name="gary_ai_datastore_id" value="' . esc_attr($value) . '" class="regular-text" />';
+        echo '<p class="description">' . __('Enter your Contextual AI Datastore ID.', 'gary-ai') . '</p>';
     }
     
 

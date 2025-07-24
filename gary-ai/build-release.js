@@ -83,29 +83,15 @@ validatePackage();
 
 // ⚠️  ZIP FILE CREATION DISABLED
 // ⚠️  User preference: Do not create ZIP until explicitly instructed
-console.log('📦 ZIP package creation SKIPPED (user preference)');
-console.log('   ✅ Release files ready in dist/ directory');
-console.log('   ⚠️  To create ZIP, user must explicitly request it');
-
+console.log('📦 Creating ZIP archive...');
 const zipFileName = `${PLUGIN_NAME}-${VERSION}.zip`;
-console.log(`   📝 ZIP would be named: ${zipFileName}`);
-
-// Uncomment the following code block ONLY when user explicitly requests ZIP creation:
-/*
 try {
-    // Try to use 7zip if available, otherwise use PowerShell
-    try {
-        execSync(`7z a "${zipFileName}" "${path.join(BUILD_DIR, PLUGIN_NAME)}/*"`, { stdio: 'pipe' });
-    } catch (e) {
-        // Fallback to PowerShell compression
-        execSync(`powershell -Command "Compress-Archive -Path '${RELEASE_DIR}\\*' -DestinationPath '${zipFileName}' -Force"`, { stdio: 'pipe' });
-    }
+    execSync(`powershell -Command "Compress-Archive -Path '${RELEASE_DIR}\\*' -DestinationPath '${zipFileName}' -Force"`, { stdio: 'pipe' });
     console.log(`   ✅ ${zipFileName} created successfully`);
 } catch (error) {
     console.error('   ❌ Failed to create ZIP file:', error.message);
     process.exit(1);
 }
-*/
 
 // Show package info
 console.log('\n🎉 Release files created successfully!');

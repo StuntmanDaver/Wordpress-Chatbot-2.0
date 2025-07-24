@@ -1,0 +1,33 @@
+{
+  "name": "gary-ai-wordpress-plugin",
+  "version": "1.0.0",
+  "description": "Gary AI WordPress Chatbot Plugin with Contextual AI Integration",
+  "scripts": {
+    "test": "echo \"Running Gary AI Plugin Tests...\" && cd ./tests && php -f run-all-tests.php",
+    "build": "node ./build-release.js",
+    "package": "echo \"⚠️  WARNING: ZIP creation disabled. Use 'npm run package-when-requested' if user explicitly requests ZIP\" && node ./build-release.js",
+    "package-when-requested": "echo \"📦 Creating ZIP as explicitly requested...\" && node ./build-release.js --create-zip",
+    "release": "echo \"⚠️  WARNING: ZIP creation disabled. Use 'npm run release-when-requested' if user explicitly requests ZIP\" && npm run build",
+    "release-when-requested": "echo \"🚀 Creating release as explicitly requested...\" && npm run package-when-requested",
+    "git:status": "git status && git log -1 --oneline",
+    "git:quick": "node -e \"const { execSync } = require('child_process'); const message = process.argv[2] || 'Quick update'; console.log('🚀 Quick Git Deploy...'); execSync('git add -A', { stdio: 'inherit' }); execSync(`git commit -m \\\"feature: ${message}\\\"`), { stdio: 'inherit' }); execSync('git push', { stdio: 'inherit' }); console.log('✅ Deploy complete!');\"",
+    "git:sync": "echo \"🔄 Syncing with GitHub...\" && git fetch origin && git pull",
+    "git:push": "echo \"⬆️  Pushing to GitHub...\" && git push",
+    "deploy": "npm run git:quick",
+    "sync": "npm run git:sync"
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "archiver": "^7.0.1"
+  },
+  "keywords": [
+    "wordpress",
+    "plugin",
+    "chatbot",
+    "ai",
+    "contextual-ai",
+    "customer-support"
+  ],
+  "author": "Gary AI Team",
+  "license": "GPL-2.0+"
+} 

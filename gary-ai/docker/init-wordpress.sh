@@ -62,6 +62,6 @@ mkdir -p /var/www/html/wp-content/themes/gary-ai-test
 chown -R www-data:www-data /var/www/html/wp-content/themes/gary-ai-test
 
 echo "✅ Gary AI Plugin WordPress setup completed!"
-echo "🌐 WordPress should be available at http://localhost:8080"
-echo "🗄️ phpMyAdmin available at http://localhost:8081"
-echo "📧 MailHog available at http://localhost:8025" 
+echo "WordPress is ready at: http://localhost:8080"
+echo "phpMyAdmin is available at: http://localhost:8081"
+echo "MailHog is available at: http://localhost:8025"

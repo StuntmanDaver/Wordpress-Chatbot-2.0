@@ -18,7 +18,6 @@ PROJECT-CLEANUP-SUMMARY.md
 # Build and test files
 build/
 dist/
-temp-extract/
 tests/
 docker/
 docker-compose.yml

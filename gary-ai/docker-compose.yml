@@ -3,13 +3,13 @@ version: '3.8'
 services:
   # WordPress service
   wordpress:
-    image: wordpress:6.4-apache
+    image: wordpress:latest
     container_name: gary-ai-wordpress
     restart: unless-stopped
     ports:
-      - "8080:80"
+      - "8080:80"  # WordPress MUST run on port 8080 - user requirement
     environment:
-      WORDPRESS_DB_HOST: mysql:3306
+      WORDPRESS_DB_HOST: mysql
       WORDPRESS_DB_USER: wordpress
       WORDPRESS_DB_PASSWORD: wordpress_password
       WORDPRESS_DB_NAME: wordpress
@@ -71,7 +71,7 @@ services:
     container_name: gary-ai-phpmyadmin
     restart: unless-stopped
     ports:
-      - "8081:80"
+      - "8081:80"  # phpMyAdmin MUST run on port 8081 - user requirement
     environment:
       PMA_HOST: mysql
       PMA_PORT: 3306
@@ -90,8 +90,8 @@ services:
     container_name: gary-ai-mailhog
     restart: unless-stopped
     ports:
-      - "8025:8025"  # Web UI
-      - "1025:1025"  # SMTP
+      - "1025:1025"  # SMTP server
+      - "8025:8025"  # Web UI - MailHog MUST run on port 8025 - user requirement
     networks:
       - gary-ai-network
 
@@ -119,20 +119,44 @@ services:
       WORDPRESS_DB_PASSWORD: wordpress_password
       WORDPRESS_DB_NAME: wordpress
     volumes:
+      - wordpress_data:/var/www/html
       - ./:/var/www/html/wp-content/plugins/gary-ai
       - wordpress_uploads:/var/www/html/wp-content/uploads
       - wordpress_themes:/var/www/html/wp-content/themes
-      - ./docker/wp-cli-setup.sh:/usr/local/bin/setup-wordpress
     depends_on:
       - mysql
       - wordpress
     networks:
       - gary-ai-network
     working_dir: /var/www/html
-    entrypoint: ["sh", "-c", "sleep 30 && /usr/local/bin/setup-wordpress"]
+    command: >
+      bash -c "
+        echo '🚀 Starting WP-CLI WordPress Configuration...'
+        sleep 30
+        echo '⏳ Waiting for WordPress to be accessible...'
+        while ! wp core is-installed --allow-root 2>/dev/null; do
+          echo 'Waiting for WordPress installation...'
+          sleep 5
+        done
+        echo '✅ WordPress is installed and ready!'
+        echo '🔌 Checking Gary AI plugin...'
+        if wp plugin is-installed gary-ai --allow-root 2>/dev/null; then
+          wp plugin activate gary-ai --allow-root
+          echo '✅ Gary AI plugin activated successfully!'
+        else
+          echo '❌ Gary AI plugin not found. Plugin files may not be mounted correctly.'
+        fi
+        echo '🛠️ Installing useful testing plugins...'
+        wp plugin install query-monitor --activate --allow-root 2>/dev/null || echo 'Query Monitor already installed'
+        echo '✅ WP-CLI setup completed successfully!'
+        echo '💡 WP-CLI is now ready for plugin management. Use: docker-compose run --rm wp-cli wp [command]'
+        tail -f /dev/null
+      "
 
 volumes:
   mysql_data:
+    driver: local
+  wordpress_data:
     driver: local
   wordpress_uploads:
     driver: local
