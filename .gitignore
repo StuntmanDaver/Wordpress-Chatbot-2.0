@@ -45,13 +45,11 @@ debug-*.php
 test-*.php
 diagnostic-*.php
 
-# Gary AI Plugin specific
-gary-ai/temp-extract/
-gary-ai/release/
-gary-ai/dist/
-gary-ai/logs/*.log
-gary-ai/database-verification-summary.md
-gary-ai/FINAL-DEPLOYMENT-STATUS.md
+# Gary AI Specific
+!gary-ai/docs/ # Include docs
+!gary-ai/logs/ # Include logs
+!gary-ai/release/ # Include release
+gary-ai/temp-extract/ # Exclude temp-extract
 
 # Testing and Docker
 gary-ai/docker/volumes/

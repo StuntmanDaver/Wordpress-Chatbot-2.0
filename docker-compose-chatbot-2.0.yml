@@ -1,0 +1,126 @@
+version: '3.8'
+
+services:
+  # WordPress Chatbot 2.0 - Main WordPress Service
+  wordpress-chatbot-2:
+    image: wordpress:latest
+    container_name: wordpress-chatbot-2-0
+    restart: unless-stopped
+    ports:
+      - "8080:80"  # WordPress MUST run on port 8080 - user requirement
+    environment:
+      WORDPRESS_DB_HOST: mysql-chatbot-2
+      WORDPRESS_DB_USER: wordpress
+      WORDPRESS_DB_PASSWORD: wordpress_password_2024
+      WORDPRESS_DB_NAME: wordpress_chatbot_2
+      WORDPRESS_DEBUG: 1
+      WORDPRESS_DEBUG_LOG: 1
+      WORDPRESS_DEBUG_DISPLAY: 0
+      WORDPRESS_CONFIG_EXTRA: |
+        define('WP_MEMORY_LIMIT', '512M');
+        define('SCRIPT_DEBUG', true);
+        define('CONCATENATE_SCRIPTS', false);
+        define('COMPRESS_SCRIPTS', false);
+        define('COMPRESS_CSS', false);
+        ini_set('display_errors', 1);
+        ini_set('display_startup_errors', 1);
+        error_reporting(E_ALL);
+    volumes:
+      # Mount the Gary AI plugin directory
+      - ./gary-ai:/var/www/html/wp-content/plugins/gary-ai
+      - wordpress_chatbot_2_data:/var/www/html
+      - wordpress_chatbot_2_themes:/var/www/html/wp-content/themes
+      - wordpress_chatbot_2_uploads:/var/www/html/wp-content/uploads
+    depends_on:
+      - mysql-chatbot-2
+    networks:
+      - chatbot-2-network
+
+  # MySQL Database for WordPress Chatbot 2.0
+  mysql-chatbot-2:
+    image: mysql:8.0
+    container_name: mysql-chatbot-2-0
+    restart: unless-stopped
+    environment:
+      MYSQL_DATABASE: wordpress_chatbot_2
+      MYSQL_USER: wordpress
+      MYSQL_PASSWORD: wordpress_password_2024
+      MYSQL_ROOT_PASSWORD: root_password_2024
+      MYSQL_AUTHENTICATION_PLUGIN: mysql_native_password
+    volumes:
+      - mysql_chatbot_2_data:/var/lib/mysql
+    networks:
+      - chatbot-2-network
+    command: --default-authentication-plugin=mysql_native_password
+
+  # phpMyAdmin for WordPress Chatbot 2.0
+  phpmyadmin-chatbot-2:
+    image: phpmyadmin/phpmyadmin:latest
+    container_name: phpmyadmin-chatbot-2-0
+    restart: unless-stopped
+    ports:
+      - "8081:80"  # phpMyAdmin MUST run on port 8081 - user requirement
+    environment:
+      PMA_HOST: mysql-chatbot-2
+      PMA_USER: wordpress
+      PMA_PASSWORD: wordpress_password_2024
+      MYSQL_ROOT_PASSWORD: root_password_2024
+    depends_on:
+      - mysql-chatbot-2
+    networks:
+      - chatbot-2-network
+
+  # MailHog for WordPress Chatbot 2.0
+  mailhog-chatbot-2:
+    image: mailhog/mailhog:latest
+    container_name: mailhog-chatbot-2-0
+    restart: unless-stopped
+    ports:
+      - "8025:8025"  # MailHog MUST run on port 8025 - user requirement
+      - "1025:1025"
+    networks:
+      - chatbot-2-network
+
+  # WP-CLI for WordPress Chatbot 2.0
+  wp-cli-chatbot-2:
+    image: wordpress:cli
+    container_name: wp-cli-chatbot-2-0
+    volumes:
+      - ./gary-ai:/var/www/html/wp-content/plugins/gary-ai
+      - wordpress_chatbot_2_data:/var/www/html
+    environment:
+      WORDPRESS_DB_HOST: mysql-chatbot-2
+      WORDPRESS_DB_USER: wordpress
+      WORDPRESS_DB_PASSWORD: wordpress_password_2024
+      WORDPRESS_DB_NAME: wordpress_chatbot_2
+    depends_on:
+      - mysql-chatbot-2
+      - wordpress-chatbot-2
+    networks:
+      - chatbot-2-network
+    working_dir: /var/www/html
+    command: tail -f /dev/null
+
+# Networks
+networks:
+  chatbot-2-network:
+    name: wordpress-chatbot-2-network
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.21.0.0/16
+
+# Volumes
+volumes:
+  mysql_chatbot_2_data:
+    name: wordpress-chatbot-2-mysql-data
+    driver: local
+  wordpress_chatbot_2_data:
+    name: wordpress-chatbot-2-wordpress-data
+    driver: local
+  wordpress_chatbot_2_themes:
+    name: wordpress-chatbot-2-themes
+    driver: local
+  wordpress_chatbot_2_uploads:
+    name: wordpress-chatbot-2-uploads
+    driver: local

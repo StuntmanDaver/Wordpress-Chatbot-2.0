@@ -1,0 +1,95 @@
+/* Gary AI Admin Styles */
+
+.gary-ai-admin-header {
+    margin-bottom: 30px;
+}
+
+.gary-ai-admin-header h1 {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.gary-ai-settings-section {
+    background: #fff;
+    padding: 20px;
+    margin-bottom: 20px;
+    border: 1px solid #ccd0d4;
+    box-shadow: 0 1px 1px rgba(0,0,0,.04);
+}
+
+.gary-ai-test-result {
+    margin-top: 10px;
+    padding: 10px;
+    border-radius: 4px;
+    display: none;
+}
+
+.gary-ai-test-result.success {
+    background: #d4edda;
+    color: #155724;
+    border: 1px solid #c3e6cb;
+}
+
+.gary-ai-test-result.error {
+    background: #f8d7da;
+    color: #721c24;
+    border: 1px solid #f5c6cb;
+}
+
+/* Responsive styles for admin screens */
+@media screen and (max-width: 768px) {
+    .gary-ai-admin-header h1 {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 15px;
+    }
+    
+    .gary-ai-settings-section {
+        margin-bottom: 15px;
+        padding: 15px;
+    }
+    
+    .gary-ai-admin-header {
+        margin-bottom: 20px;
+    }
+    
+    .wrap .form-table th {
+        padding: 10px 0;
+        width: 100%;
+        display: block;
+    }
+    
+    .wrap .form-table td {
+        padding: 5px 0 15px 0;
+        display: block;
+        width: 100%;
+    }
+    
+    .wrap .form-table input[type="text"],
+    .wrap .form-table textarea {
+        width: 100%;
+        max-width: 100%;
+    }
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+    .gary-ai-settings-section {
+        background: #1e1e1e;
+        border-color: #404040;
+        color: #e0e0e0;
+    }
+    
+    .gary-ai-test-result.success {
+        background: #1a3e2e;
+        color: #4ade80;
+        border-color: #166534;
+    }
+    
+    .gary-ai-test-result.error {
+        background: #3e1a1a;
+        color: #f87171;
+        border-color: #991b1b;
+    }
+} 

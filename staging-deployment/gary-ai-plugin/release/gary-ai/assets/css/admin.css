@@ -1,0 +1,38 @@
+/* Gary AI Admin Styles */
+
+.gary-ai-admin-header {
+    margin-bottom: 30px;
+}
+
+.gary-ai-admin-header h1 {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.gary-ai-settings-section {
+    background: #fff;
+    padding: 20px;
+    margin-bottom: 20px;
+    border: 1px solid #ccd0d4;
+    box-shadow: 0 1px 1px rgba(0,0,0,.04);
+}
+
+.gary-ai-test-result {
+    margin-top: 10px;
+    padding: 10px;
+    border-radius: 4px;
+    display: none;
+}
+
+.gary-ai-test-result.success {
+    background: #d4edda;
+    color: #155724;
+    border: 1px solid #c3e6cb;
+}
+
+.gary-ai-test-result.error {
+    background: #f8d7da;
+    color: #721c24;
+    border: 1px solid #f5c6cb;
+} 

@@ -60,7 +60,6 @@ gary-ai/SECURITY.md
 # Gary AI Plugin build and test files
 gary-ai/build/
 gary-ai/dist/
-gary-ai/temp-extract/
 gary-ai/release/
 gary-ai/tests/
 gary-ai/docker/
